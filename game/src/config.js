@@ -59,12 +59,10 @@ export const CONFIG = {
     // Zone multipliers on torso damage. Sniper and shotgun override headMult per weapon.
     head: 4, torso: 1, limb: 0.75,
     // Falloff: full damage out to 60% of effective range, then linear down to
-    // 55% at 150% of effective range.
     falloffStart: 0.6, falloffEnd: 1.5, falloffMin: 0.55,
     // Armor: incoming damage x0.55. Helmet: head multiplier 4 becomes 2.2 BEFORE armor.
     armorMult: 0.55, helmetHeadMult: 2.2,
     // Rifle headshot vs helmet+armor: 34 x 2.2 x 0.55 = ~41 (no one-tap).
-    // Rifle headshot without helmet: 34 x 4 = 136 (lethal). Pistol headshot: 104.
   },
 
   spread: {
@@ -72,7 +70,6 @@ export const CONFIG = {
     rifleStill: 0.0025, rifleCrouch: 0.0012, rifleMoving: 0.026, rifleAir: 0.06,
     smgMult: 0.8, shotgunCone: 0.045, sniperUnscoped: 0.05, sniperScopedStill: 0.0004,
     // Recoil: +0.35 degrees per rifle shot, recovers 90 ms after stopping;
-    // sustained fire past 5 shots blooms base spread x1.5.
     recoilPerShotDegrees: 0.35, recoilRecoverMs: 90, bloomAfterShots: 5, bloomMult: 1.5,
   },
 
@@ -114,7 +111,6 @@ export const CONFIG = {
   map: {
     widthMeters: 40, depthMeters: 36, wallHeightMeters: 5,
     // Lanes: West (Striker spawn to A), Mid (corridor + Catwalk), East tunnels (to B).
-    // Every site has 2 entrances (its lane + Mid). Spawn to site: 14-20 s on foot.
     catwalkHeightMeters: 2.4,
     zones: [
       'Striker Spawn', 'West Lane', 'A Lobby', 'Core A', 'Mid', 'Catwalk',

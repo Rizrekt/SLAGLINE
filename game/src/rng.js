@@ -28,17 +28,6 @@ export function createRng(seed) {
     pick(array) {
       return array[Math.floor(random() * array.length)];
     },
-    // Fisher-Yates with the seeded stream; returns a new array.
-    shuffle(array) {
-      const out = array.slice();
-      for (let i = out.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(random() * (i + 1));
-        const tmp = out[i];
-        out[i] = out[j];
-        out[j] = tmp;
-      }
-      return out;
-    },
     // Approximate Gaussian (mean 0, stddev 1) via Box-Muller.
     gauss() {
       let u = 0;
