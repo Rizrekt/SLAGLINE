@@ -67,7 +67,6 @@ function rayAabb(origin, dir, min, max) {
 }
 
 // A direction inside a cone of `angle` radians around `dir`, uniformly
-// distributed over the disc. Seeded: the same rng stream replays the shot.
 function perturbDirection(dir, angle, rng) {
   if (angle <= 0) return dir.clone();
   const ref = Math.abs(dir.y) > 0.9 ? RIGHT : UP;
@@ -217,7 +216,6 @@ export function createWeaponSet(actor) {
       return Boolean(set.owned[id]);
     },
 
-    // Buying a weapon stocks it full: magazine + reserve from CONFIG.
     add(id) {
       const def = CONFIG.weapons[id];
       if (!def || set.owned[id]) return false;
@@ -242,7 +240,6 @@ export function createWeaponSet(actor) {
       return { id: w.def.id, name: w.def.name, mag: w.mag, reserve: w.reserve, magSize: w.def.mag };
     },
 
-    // Current spread in radians, for the HUD crosshair gap.
     spreadNow() {
       const w = set.current();
       if (!w) return 0;
@@ -267,7 +264,6 @@ export function createWeaponSet(actor) {
     },
 
     // Fixed-step tick: recoil recovery and reload completion run on sim
-    // time, never on wall-clock time, so replays stay deterministic.
     tick(dt) {
       set.elapsed += dt;
       const s = CONFIG.spread;

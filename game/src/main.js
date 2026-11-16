@@ -17,7 +17,7 @@ import { Economy } from './economy.js';
 import { Bomb } from './bomb.js';
 import { createPlayer } from './player.js';
 import { createInput } from './input.js';
-import { createHud } from './hud.js';
+import { createHud, BUY_ORDER } from './hud.js';
 import { createEffects } from './effects.js';
 import { Audio, unlockAudio, setListenerPos } from './audio.js';
 
@@ -268,14 +268,26 @@ hud.onPlay(() => {
   }
   input.requestLock();
 });
-hud.onBuy((id) => {
+function ownedMap() {
+  const owned = {};
+  for (const id of BUY_ORDER) {
+    owned[id] = id === 'he' ? (playerActor.grenades || 0) > 0
+      : id === 'armor' ? !!playerActor.armor
+      : id === 'helmet' ? !!playerActor.helmet
+      : playerActor.weapons.has(id);
+  }
+  return owned;
+}
+// One buy path for menu clicks and Digit1-8 keys (pointer lock eats clicks).
+function buyItem(id) {
   if (Economy.tryBuy(playerActor, id)) {
     Audio.play('buy', playerActor.pos);
-    hud.refreshBuy(playerActor.money, playerActor.weapons);
+    hud.refreshBuy(playerActor.money, ownedMap());
   } else {
     Audio.play('buy_error', playerActor.pos);
   }
-});
+}
+hud.onBuy(buyItem);
 
 function onLockChange(locked) {
   if (shot) return;
@@ -284,7 +296,9 @@ function onLockChange(locked) {
     unlockAudio();
     hud.hideOverlay();
   } else if (!round.matchOver) {
-    hud.showOverlay(started ? 'paused' : 'start');
+    // Buy open: no pause overlay, so the menu stays clickable unlocked.
+    if (hud.buyIsOpen()) hud.hideOverlay();
+    else hud.showOverlay(started ? 'paused' : 'start');
   }
 }
 
@@ -385,6 +399,8 @@ function syncHud() {
   hud.setCarrier(round.carrier === playerActor);
   hud.setPlant(Bomb.plantProgress(), Bomb.defuseProgress(), Bomb.state.planted);
   hud.setScope(scoped);
+  hud.setMinimap(colliders, map.sites, actors, playerActor,
+    Bomb.state.planted && Bomb.state.site ? Bomb.state.site.id : null);
 }
 
 function frame(now) {
@@ -400,9 +416,12 @@ function frame(now) {
       else if (code === 'KeyG') grenade.throw(playerActor);
       else if (code === 'KeyB') hud.toggleBuy(round.phase);
       else if (code.startsWith('Digit')) {
-        const ids = ['p9', 'p50', 'kestrel', 'mule', 'ar7', 'vigil'];
-        const id = ids[Number(code.slice(5)) - 1];
-        if (id) playerActor.weapons.switchTo(id);
+        const n = Number(code.slice(5));
+        if (hud.buyIsOpen()) { if (BUY_ORDER[n - 1]) buyItem(BUY_ORDER[n - 1]); }
+        else {
+          const ids = ['p9', 'p50', 'kestrel', 'mule', 'ar7', 'vigil'];
+          if (ids[n - 1]) playerActor.weapons.switchTo(ids[n - 1]);
+        }
       }
     }
     let steps = 0;

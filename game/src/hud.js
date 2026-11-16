@@ -13,6 +13,8 @@ const COPY = {
 };
 const BUY_WEAPONS = ['p50', 'kestrel', 'mule', 'ar7', 'vigil'];
 const BUY_ITEMS = ['he', 'armor', 'helmet'];
+// Menu order = the Digit1..Digit8 buy keys main.js routes while it is open.
+export const BUY_ORDER = [...BUY_WEAPONS, ...BUY_ITEMS];
 
 export function createHud() {
   const $ = (id) => document.getElementById(id);
@@ -25,6 +27,7 @@ export function createHud() {
   const plantFill = $('plant-fill'), plantLabel = $('plant-label');
   const buyEl = $('buy'), buyMoney = $('buy-money'), buyList = $('buy-list');
   const carrierEl = $('carrier'), scopeEl = $('scope'), kdEl = $('kd-value');
+  const mmEl = $('minimap'), mm = mmEl ? mmEl.getContext('2d') : null;
   let hitTimer = 0;
   let last = {};
   let buyHandler = null;
@@ -36,24 +39,17 @@ export function createHud() {
     el.textContent = value;
   }
 
-  function buildBuy() {
+  function buildBuy(owned = {}) {
     buyList.innerHTML = '';
-    const add = (id, name, price, owned) => {
+    BUY_ORDER.forEach((id, i) => {
+      const def = CONFIG.weapons[id] || CONFIG.items[id];
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'buy-item';
-      b.textContent = `${name} — $${price}${owned ? ' ✓' : ''}`;
+      b.textContent = `${i + 1} · ${def.name} — $${def.price}${owned[id] ? ' ✓' : ''}`;
       b.addEventListener('click', () => { if (buyHandler) buyHandler(id); });
       buyList.appendChild(b);
-    };
-    for (const id of BUY_WEAPONS) {
-      const w = CONFIG.weapons[id];
-      add(id, w.name, w.price, false);
-    }
-    for (const id of BUY_ITEMS) {
-      const item = CONFIG.items[id];
-      add(id, item.name, item.price, false);
-    }
+    });
   }
   buildBuy();
 
@@ -126,11 +122,47 @@ export function createHud() {
     onBuy(handler) { buyHandler = handler; },
     showBuy() { buyEl.hidden = false; buyOpen = true; },
     hideBuy() { buyEl.hidden = true; buyOpen = false; },
+    buyIsOpen() { return buyOpen; },
     toggleBuy(phase) {
       if (phase !== 'FREEZE' && phase !== 'LIVE') return;
       if (buyOpen) this.hideBuy();
       else this.showBuy();
     },
-    refreshBuy(money) { this.setMoney(money); },
+    refreshBuy(money, owned) { this.setMoney(money); buildBuy(owned); },
+    // Minimap from sim state only: walls, sites, actor dots, player tick.
+    setMinimap(walls, sites, actors, me, plantedId) {
+      if (!mm) return;
+      const W = mmEl.width, H = mmEl.height;
+      const sx = (x) => (x + 20.4) / 40.8 * W, sz = (z) => (z + 18.4) / 36.8 * H;
+      const dot = (x, z, r) => { mm.beginPath(); mm.arc(sx(x), sz(z), r, 0, 7); mm.fill(); };
+      mm.fillStyle = '#241d19';
+      mm.fillRect(0, 0, W, H);
+      mm.fillStyle = '#4a4d52';
+      for (const b of walls) {
+        if (b.max.y < 1) continue;
+        mm.fillRect(sx(b.min.x), sz(b.min.z), sx(b.max.x) - sx(b.min.x), sz(b.max.z) - sz(b.min.z));
+      }
+      for (const s of sites) {
+        const cx = sx(s.center.x), cy = sz(s.center.z);
+        mm.strokeStyle = mm.fillStyle = s.id === 'A' ? '#ff9f1c' : '#b388ff';
+        mm.lineWidth = 1.5;
+        mm.beginPath(); mm.arc(cx, cy, 14, 0, 7); mm.stroke();
+        mm.font = 'bold 10px ui-monospace, monospace';
+        mm.fillText(s.id, cx - 3, cy + 3);
+        if (s.id === plantedId) dot(s.center.x, s.center.z, 3.5);
+      }
+      for (const a of actors) {
+        if (!a.alive || a === me) continue;
+        mm.fillStyle = a.team === me.team ? '#2ec4b6' : '#f06423';
+        dot(a.pos.x, a.pos.z, 2.6);
+      }
+      const px = sx(me.pos.x), py = sz(me.pos.z);
+      mm.strokeStyle = mm.fillStyle = '#ffffff';
+      mm.beginPath();
+      mm.moveTo(px, py);
+      mm.lineTo(px - Math.sin(me.yaw) * 9, py - Math.cos(me.yaw) * 9);
+      mm.stroke();
+      dot(me.pos.x, me.pos.z, 3.2);
+    },
   };
 }

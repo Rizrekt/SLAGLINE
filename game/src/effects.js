@@ -22,7 +22,7 @@ const _mid = new THREE.Vector3();
 const _dir = new THREE.Vector3();
 
 export function createEffects(scene) {
-  // ---- Tracers: thin additive boxes stretched between two points ----
+  // Tracers: thin additive boxes stretched between two points.
   const tracers = [];
   const tracerGeo = new THREE.BoxGeometry(1, 1, 1);
   for (let i = 0; i < TRACER_COUNT; i += 1) {
@@ -36,7 +36,7 @@ export function createEffects(scene) {
   }
   let tracerNext = 0;
 
-  // ---- Muzzle flashes: sprite + point light, pool of 2 ----
+  // Muzzle flashes: sprite + point light, pool of 2.
   const muzzleTex = (() => {
     const canvas = document.createElement('canvas');
     canvas.width = 64;
@@ -64,7 +64,7 @@ export function createEffects(scene) {
   }
   let muzzleNext = 0;
 
-  // ---- Impact sparks: small additive sprites that pop and fade ----
+  // Impact sparks: small additive sprites that pop and fade.
   const impacts = [];
   for (let i = 0; i < IMPACT_COUNT; i += 1) {
     const sprite = new THREE.Sprite(
@@ -76,7 +76,7 @@ export function createEffects(scene) {
   }
   let impactNext = 0;
 
-  // ---- Explosions: expanding additive spheres + one shared light ----
+  // Explosions: expanding additive spheres + one shared light.
   const explosions = [];
   const explosionLight = new THREE.PointLight(0xff8c2e, 0, 22, 2);
   scene.add(explosionLight);

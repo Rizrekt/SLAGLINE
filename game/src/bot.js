@@ -43,7 +43,6 @@ const tmpUp = new THREE.Vector3();
 const tmpMove = new THREE.Vector3();
 
 // Segment vs AABB slab test. A wall between the eyes and the target blocks
-// the conservative (fair) choice for the player.
 function segmentHitsBox(a, b, box) {
   let tmin = 0;
   let tmax = 1;
@@ -379,7 +378,6 @@ export function createBotBrain(actor, world) {
         const facingGap = Math.abs(angleDiff(angleTo, actor.yaw)) / DEG;
         reactionTimer = rollReaction(facingGap);
       }
-      // Callout: the whole team now knows roughly where the enemy is.
       const memory = teamMemory();
       if (memory) {
         memory.lastEnemyPos = lastSeenPos.clone();
@@ -414,7 +412,6 @@ export function createBotBrain(actor, world) {
       }
     }
 
-    // Memory expires after 4 s; a stale position is no longer a task.
     if (lastSeenValid && t - lastSeenAt > BOT.lastSeenMemorySeconds) {
       lastSeenValid = false;
     }
@@ -470,7 +467,6 @@ export function createBotBrain(actor, world) {
             const spawn = spawns[botIndex % spawns.length];
             setPathTo(new THREE.Vector3(spawn.pos.x, 0, spawn.pos.z));
           } else if (perception && perception.chargePos) {
-            // No spawn point wired: run directly away from the charge.
             const awayX = actor.pos.x - perception.chargePos.x;
             const awayZ = actor.pos.z - perception.chargePos.z;
             const len = Math.hypot(awayX, awayZ) || 1;
@@ -511,7 +507,6 @@ export function createBotBrain(actor, world) {
       holdYaw = actor.yaw;
     } else if (state === BOT_STATES.INVESTIGATE) {
       if (!moveTarget) {
-        // Arrived: scan for 2 s, then return to the task.
         holdUntil = t + 2;
         setState(BOT_STATES.HOLD);
         holdYaw = actor.yaw;
@@ -593,7 +588,6 @@ export function createBotBrain(actor, world) {
 
   function setState(next) {
     if (state === next) return;
-    // Leaving combat clears the burst so the next fight starts fresh.
     if (next !== BOT_STATES.ENGAGE) {
       burstLeft = 0;
       burstGapTimer = 0;
@@ -643,7 +637,6 @@ export function createBotBrain(actor, world) {
     aimYaw += Math.max(-maxTurn, Math.min(maxTurn, angleDiff(wantYaw, aimYaw)));
     aimPitch += Math.max(-maxTurn, Math.min(maxTurn, angleDiff(wantPitch, aimPitch)));
 
-    // Strafe between bursts, stand still while firing.
     if (burstLeft > 0) {
       fireTimer -= dt;
       if (fireTimer <= 0) {
@@ -716,7 +709,6 @@ export function createBotBrain(actor, world) {
       return;
     }
     if (state === BOT_STATES.HOLD && moveTarget) {
-      // Walking to a post-plant hold point after the charge is planted.
       followPath(dt, WALK_SPEED);
     }
   }
@@ -732,7 +724,6 @@ export function createBotBrain(actor, world) {
       think(perception || {});
     }
     if (reactionTimer > 0) reactionTimer -= dt;
-    // Low health and a nearby cover node: break off and reposition.
     if (state === BOT_STATES.ENGAGE && actor.health < 30 && moveTarget === null) {
       const cover = holdPointFor();
       setState(BOT_STATES.REPOSITION);

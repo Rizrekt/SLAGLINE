@@ -50,6 +50,7 @@
   #health-value.low { color: var(--danger); }
   #carrier { color: var(--accent); }
   #killfeed { position: fixed; right: 32px; top: 20px; text-align: right; font-family: var(--font-readout); font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+  #minimap { position: fixed; right: 32px; top: 118px; border: 1px solid var(--hairline); border-radius: var(--radius-panel); }
   #banner { position: fixed; top: 96px; left: 50%; transform: translateX(-50%); padding: 8px 16px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-panel); font-size: 15px; color: var(--ink); }
   #banner[hidden], #plant[hidden], #buy[hidden], #scope[hidden] { display: none; }
   #plant { position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%); width: 260px; text-align: center; }
@@ -85,13 +86,14 @@
   <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
   <div id="topbar"><div id="phase-value">BUY</div><div id="timer-value">12s</div><div id="round-value">Round 1</div></div>
   <div id="status"><span>Health <b id="health-value">100 HP</b></span><span>Money <b id="money-value">$800</b></span><span>Weapon <b id="weapon-value">P9 Sidearm</b></span><span>Zone <b id="zone-value">Striker Spawn</b></span><span id="carrier"></span><span>K/D <b id="kd-value">0K / 0D</b></span></div>
+  <canvas id="minimap" width="176" height="160"></canvas>
   <div id="killfeed"></div>
   <div id="banner" hidden></div>
   <div id="plant" hidden><div id="plant-label">PLANTING…</div><div id="plant-bar"><div id="plant-fill"></div></div></div>
   <div id="scope" hidden>SCOPED</div>
   <div id="ammo"><span id="ammo-mag">12</span><span id="ammo-reserve">/ 48</span></div>
   <div id="score">Strikers <b id="score-value">0 : 0</b> Sentinels</div>
-  <div id="buy" hidden><h2>Buy — round budget</h2><div id="buy-money">$800</div><div id="buy-list"></div></div>
+  <div id="buy" hidden><h2>Buy — keys 1–8 or click</h2><div id="buy-money">$800</div><div id="buy-list"></div></div>
 </div>
 
 <div id="overlay" class="overlay">
@@ -107,7 +109,7 @@
       <li><kbd>B</kbd> Buy menu</li>
       <li><kbd>G</kbd> Throw grenade</li>
       <li><kbd>E</kbd> Hold to plant / defuse</li>
-      <li><kbd>1</kbd>–<kbd>6</kbd> Switch weapon</li>
+      <li><kbd>1</kbd>–<kbd>8</kbd> Buy in menu / switch weapon</li>
       <li><kbd>Right mouse</kbd> Scope (Vigil)</li>
       <li><kbd>Ctrl</kbd> Crouch</li>
       <li><kbd>Space</kbd> Jump</li>
